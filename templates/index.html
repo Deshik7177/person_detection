@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rescue Command Center</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Professional Dark Palette */
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --panel-border: #334155;
+            --primary: #3b82f6;      /* Professional Blue */
+            --primary-hover: #2563eb;
+            --accent: #0ea5e9;       /* Light Blue/Cyan */
+            --danger: #ef4444;       /* Red for Stop/Danger */
+            --danger-hover: #dc2626;
+            --success: #10b981;      /* Green for Status */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation Bar */
+        .navbar {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--panel-border);
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .brand-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: white;
+        }
+
+        .brand-text span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .nav-status {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse-green 2s infinite;
+        }
+
+        /* Main Dashboard Layout */
+        .dashboard {
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Video Feed Panel */
+        .video-panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-tag {
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            animation: pulse-red 1.5s infinite;
+        }
+
+        .video-container {
+            flex: 1;
+            background: black;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            position: relative;
+            min-height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .overlay-stats {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .stat-pill {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: white;
+            font-family: monospace;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Control Center Panel */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* D-Pad Grid */
+        .dpad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 1rem;
+        }
+
+        .btn-ctrl {
+            aspect-ratio: 1;
+            background: #334155;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            box-shadow: 0 4px 0 #1e293b;
+        }
+
+        .btn-ctrl span {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-ctrl:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        /* Active/Hover States */
+        .btn-up { grid-column: 2; grid-row: 1; background: var(--primary); box-shadow: 0 4px 0 #1d4ed8; }
+        .btn-up:hover { background: var(--primary-hover); }
+
+        .btn-left { grid-column: 1; grid-row: 2; background: var(--accent); box-shadow: 0 4px 0 #0284c7; }
+        .btn-left:hover { filter: brightness(1.1); }
+
+        .btn-right { grid-column: 3; grid-row: 2; background: var(--accent); box-shadow: 0 4px 0 #0284c7; }
+        .btn-right:hover { filter: brightness(1.1); }
+
+        .btn-down { grid-column: 2; grid-row: 3; background: #64748b; box-shadow: 0 4px 0 #475569; }
+        .btn-down:hover { background: #94a3b8; }
+
+        .btn-stop { 
+            grid-column: 2; grid-row: 2; 
+            background: var(--danger); 
+            box-shadow: 0 4px 0 #b91c1c;
+            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+        }
+        .btn-stop:hover { background: var(--danger-hover); }
+
+        /* Telemetry List */
+        .telemetry-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .telemetry-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .telemetry-item:hover {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .t-label {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .t-value {
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Animations */
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            .video-container {
+                min-height: 300px;
+            }
+            .control-panel {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .control-card {
+                flex: 1;
+                min-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Professional Header -->
+    <nav class="navbar">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="brand-text">
+                <h1>RESCUE COMMAND</h1>
+                <span>Tactical Interface v2.0</span>
+            </div>
+        </div>
+        <div class="nav-status">
+            <div class="status-badge">
+                <div class="status-dot" id="connection-dot"></div>
+                <span id="connection-text">SYSTEM ONLINE</span>
+            </div>
+            <div style="text-align: right; font-size: 0.8rem; color: var(--text-muted);">
+                <div id="clock-date">2026-03-18</div>
+                <div id="clock-time" style="font-weight: bold; color: var(--text-main); font-size: 1.1rem;">00:00:00</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+        
+        <!-- Video Feed Section -->
+        <section class="video-panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fa-solid fa-eye"></i> LIVE OPTICAL FEED - HEATMAP
+                </div>
+                <span class="live-tag">LIVE</span>
+            </div>
+            
+            <div class="video-container">
+                <img src="/video_feed" class="video-feed" alt="Video Stream Disconnected">
+                <div class="overlay-stats">
+                    <span class="stat-pill"><i class="fa-solid fa-video"></i> CAM-01</span>
+                    <span class="stat-pill" style="color: #fbbf24;"><i class="fa-solid fa-bolt"></i> YOLOv8</span>
+                    <span class="stat-pill">FPS: 30</span>
+                </div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; gap: 20px;">
+                <p><i class="fa-solid fa-circle-info"></i> Latency Optimization: <span style="color:var(--success)">Active</span></p>
+                <p><i class="fa-solid fa-temperature-low"></i> Heatmap Decay: <span style="color:var(--accent)">0.70</span></p>
+            </div>
+        </section>
+
+        <!-- Control Sidebar -->
+        <aside class="control-panel">
+            
+            <!-- Manual Controls -->
+            <div class="control-card">
+                <div class="panel-header" style="margin-bottom: 1rem;">
+                    <div class="panel-title"><i class="fa-solid fa-gamepad"></i> MANUAL OVERRIDE</div>
+                </div>
+                
+                <div class="dpad-container">
+                    <!-- Row 1 -->
+                    <div></div>
+                    <button class="btn-ctrl btn-up" onclick="sendCommand('forward')" title="Forward (Arrow Up)">
+                        <i class="fa-solid fa-arrow-up"></i>
+                        <span>Fwd</span>
+                    </button>
+                    <div></div>
+                    
+                    <!-- Row 2 -->
+                    <button class="btn-ctrl btn-left" onclick="sendCommand('left')" title="Left (Arrow Left)">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Left</span>
+                    </button>
+                    <button class="btn-ctrl btn-stop" onclick="sendCommand('stop')" title="Emergency Stop (Space)">
+                        <i class="fa-solid fa-stop"></i>
+                        <span>STOP</span>
+                    </button>
+                    <button class="btn-ctrl btn-right" onclick="sendCommand('right')" title="Right (Arrow Right)">
+                        <i class="fa-solid fa-arrow-right"></i>
+                        <span>Right</span>
+                    </button>
+                    
+                    <!-- Row 3 -->
+                    <div></div>
+                    <button class="btn-ctrl btn-down" onclick="sendCommand('backward')" title="Backward (Arrow Down)">
+                        <i class="fa-solid fa-arrow-down"></i>
+                        <span>Back</span>
+                    </button>
+                    <div></div>
+                </div>
+                <div style="text-align: center; margin-top: 15px; font-size: 0.8rem; color: var(--text-muted);">
+                    Use Keyboard Arrow Keys to Navigate
+                </div>
+            </div>
+
+            <!-- Telemetry -->
+            <div class="control-card">
+                <div class="panel-header" style="margin-bottom: 1rem;">
+                    <div class="panel-title"><i class="fa-solid fa-chart-line"></i> TELEMETRY</div>
+                </div>
+                
+                <div class="telemetry-list">
+                    <div class="telemetry-item">
+                        <span class="t-label"><i class="fa-solid fa-satellite-dish"></i> STATUS</span>
+                        <span class="t-value" style="color: var(--success);">CONNECTED</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="t-label"><i class="fa-solid fa-terminal"></i> LAST CMD</span>
+                        <span class="t-value" id="last-cmd-display">NONE</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="t-label"><i class="fa-solid fa-microchip"></i> PORT</span>
+                        <span class="t-value">COM7</span>
+                    </div>
+                    <div class="telemetry-item">
+                        <span class="t-label"><i class="fa-solid fa-gauge-high"></i> BAUD</span>
+                        <span class="t-value">115200</span>
+                    </div>
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <script>
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+            document.getElementById('clock-date').innerText = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Check Connection (Mocked for UI responsiveness)
+        setInterval(() => {
+            const dot = document.getElementById('connection-dot');
+            const text = document.getElementById('connection-text');
+            // Assuming always online for the demo unless server fails
+            if(navigator.onLine) {
+                dot.style.backgroundColor = 'var(--success)';
+                dot.style.boxShadow = '0 0 8px var(--success)';
+                text.innerText = "SYSTEM ONLINE";
+                text.style.color = "var(--success)";
+            } else {
+                dot.style.backgroundColor = 'var(--danger)';
+                dot.style.boxShadow = '0 0 8px var(--danger)';
+                text.innerText = "OFFLINE";
+                text.style.color = "var(--danger)";
+            }
+        }, 3000);
+
+        // Command handling
+        function sendCommand(cmd) {
+            // Update UI immediately (Optimistic UI)
+            const display = document.getElementById('last-cmd-display');
+            display.innerText = cmd.toUpperCase();
+            display.style.color = '#fff';
+            
+            setTimeout(() => {
+                display.style.color = 'var(--accent)';
+            }, 300);
+
+            // Send network request
+            fetch(`/command/${cmd}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Command executed:', data);
+                })
+                .catch(err => {
+                    console.error('Command failed:', err);
+                    display.innerText = "ERROR";
+                    display.style.color = "var(--danger)";
+                });
+        }
+
+        // Keyboard listeners
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return; // Prevent spamming on hold (optional)
+            
+            switch(e.key) {
+                case 'ArrowUp': sendCommand('forward'); break;
+                case 'ArrowDown': sendCommand('backward'); break;
+                case 'ArrowLeft': sendCommand('left'); break;
+                case 'ArrowRight': sendCommand('right'); break;
+                case ' ': sendCommand('stop'); break;
+            }
+        });
+    </script>
+</body>
+</html>
