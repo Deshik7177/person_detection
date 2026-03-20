@@ -15,7 +15,8 @@ latest_frame = None
 frame_lock = threading.Lock()
 serial_conn = None
 
-SERIAL_PORT = 'COM7'
+# For Raspberry Pi/Linux, set SERIAL_PORT = '/dev/ttyUSB0' or '/dev/ttyACM0'
+SERIAL_PORT = 'COM7'  # Windows example; change for Pi/Linux
 BAUD_RATE = 115200
 
 def init_serial():

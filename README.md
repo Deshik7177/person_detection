@@ -389,3 +389,51 @@ For issues or questions:
 
 **Last Updated**: March 18, 2026
 **Version**: 2.0 (Rescue Command Center)
+
+---
+
+## 🍓 Raspberry Pi 5 Setup
+
+### 1. Install Python 3 (if not already installed)
+```bash
+sudo apt update
+sudo apt install python3 python3-pip python3-venv -y
+```
+
+### 2. Clone/Download Project
+```bash
+cd ~
+git clone https://github.com/yourusername/person_detection.git
+cd person_detection
+```
+
+### 3. (Recommended) Create Virtual Environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 4. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+Or manually:
+```bash
+pip install flask flask-cors pyserial opencv-python ultralytics numpy
+```
+
+### 5. Serial Port Note
+- On Raspberry Pi/Linux, your ESP32 will usually appear as `/dev/ttyUSB0` or `/dev/ttyACM0`.
+- Edit `main.py` and set:
+  ```python
+  SERIAL_PORT = '/dev/ttyUSB0'  # or '/dev/ttyACM0'
+  ```
+
+### 6. Camera Note
+- Most USB webcams work out of the box.
+- For the Pi Camera Module, you may need to enable it and use `cv2.VideoCapture(0)`.
+
+### 7. Run the Application
+```bash
+python3 main.py
+```
